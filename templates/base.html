@@ -1,0 +1,65 @@
+{% load static %}<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}Підписки{% endblock %} · Subly</title>
+  <link rel="icon" type="image/png" href="{% static 'subscriptions/img/subly.png' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+  <script>tailwind = { config: { corePlugins: { preflight: false } } };</script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="stylesheet" href="{% static 'subscriptions/css/style.css' %}?v=10">
+</head>
+<body class="{% if user.is_authenticated %}with-sidebar{% else %}guest{% endif %}">
+  {% if user.is_authenticated %}
+    {% include 'partials/sidebar.html' %}
+  {% endif %}
+  <main class="content">
+    {% if messages %}
+      <div class="messages" role="status">
+        {% for message in messages %}
+          <div class="message message-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  {% if user.is_authenticated %}
+    <dialog class="modal" id="confirm-delete" aria-labelledby="confirm-delete-title">
+      <form method="post" class="modal-box">
+        {% csrf_token %}
+        <div class="modal-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg>
+        </div>
+        <h2 id="confirm-delete-title">Видалити <span data-kind></span>?</h2>
+        <p class="muted">«<span data-name></span>» буде видалено без можливості відновлення.</p>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" type="button" data-close>Скасувати</button>
+          <button class="btn btn-danger" type="submit">Видалити</button>
+        </div>
+      </form>
+    </dialog>
+    <script>
+      (function () {
+        var dialog = document.querySelector("#confirm-delete");
+        if (!dialog || typeof dialog.showModal !== "function") return; // без підтримки лишається звичайна сторінка підтвердження
+        var form = dialog.querySelector("form");
+        document.addEventListener("click", function (e) {
+          var link = e.target.closest("[data-confirm-delete]");
+          if (!link) return;
+          e.preventDefault();
+          form.action = link.getAttribute("href");
+          dialog.querySelector("[data-kind]").textContent = link.dataset.kind || "";
+          dialog.querySelector("[data-name]").textContent = link.dataset.name || "";
+          dialog.showModal();
+        });
+        dialog.querySelector("[data-close]").addEventListener("click", function () { dialog.close(); });
+        // клік по затемненому фону закриває вікно
+        dialog.addEventListener("mousedown", function (e) { if (e.target === dialog) dialog.close(); });
+      })();
+    </script>
+  {% endif %}
+</body>
+</html>

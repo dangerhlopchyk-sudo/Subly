@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load subs_extras %}
+{% block title %}Дашборд{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>Дашборд</h1>
+    <p class="muted">{{ today|date:"l, j E Y" }}</p>
+  </div>
+  <a class="btn btn-primary" href="{% url 'subscriptions:add' %}">Додати підписку</a>
+</header>
+
+{% if not subs %}
+  <section class="card empty">
+    <h2>Підписок поки немає</h2>
+    <p class="muted">Додайте першу підписку, і тут з'являться витрати, платежі та календар.</p>
+    <a class="btn btn-primary" href="{% url 'subscriptions:add' %}">Додати підписку</a>
+  </section>
+{% else %}
+
+<div class="overview">
+  <section class="card gauge-card" aria-label="Витрати за місяць">
+    <div class="gauge">
+      <svg viewBox="0 0 240 240" role="img" aria-label="Оплачено {{ ring.percent }}% платежів цього місяця">
+        <defs>
+          <linearGradient id="ring-grad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#4f7cff"/>
+            <stop offset="1" stop-color="#3fd0f6"/>
+          </linearGradient>
+        </defs>
+        <circle class="ring-track" cx="120" cy="120" r="{{ ring.r }}" transform="rotate(135 120 120)"
+                style="stroke-dasharray: {{ ring.track }} 999"/>
+        {% if ring.percent %}
+        <circle class="ring-progress" cx="120" cy="120" r="{{ ring.r }}" transform="rotate(135 120 120)"
+                style="--len: {{ ring.progress }}"/>
+        {% endif %}
+      </svg>
+      <div class="gauge-center">
+        <strong class="gauge-amount">{{ month_total|uah_short }}</strong>
+        <span class="muted">витрати на місяць</span>
+        <span class="pill">{{ ring.percent }}% оплачено</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="stat"><span class="muted">Активні підписки</span><strong>{{ active_count }}</strong></div>
+    <div class="stat stat-accent"><span class="muted">Витрати за місяць</span><strong>{{ month_total|uah_short }}</strong><small>усі активні підписки</small></div>
+    <div class="stat stat-accent"><span class="muted">Витрати за рік</span><strong>{{ year_total|uah_short }}</strong><small>за 12 місяців</small></div>
+    <div class="stat">
+      <span class="muted">Найдорожча</span>
+      {% if priciest %}<strong>{{ priciest.monthly_cost|uah_short }}</strong><small>{{ priciest.name }}</small>{% else %}<strong>-</strong>{% endif %}
+    </div>
+    <div class="stat">
+      <span class="muted">Найдешевша</span>
+      {% if cheapest %}<strong>{{ cheapest.monthly_cost|uah_short }}</strong><small>{{ cheapest.name }}</small>{% else %}<strong>-</strong>{% endif %}
+    </div>
+  </div>
+</div>
+
+<section class="card" aria-label="Календар платежів">
+  <div class="section-head">
+    <h2>Календар платежів</h2>
+    {% if selected_day %}<a class="btn btn-ghost btn-sm" href="{% url 'subscriptions:dashboard' %}?tab=upcoming">Показати всі</a>{% endif %}
+  </div>
+  <div class="strip">
+    {% for day in strip %}
+      <a class="day{% if day.date == selected_day %} is-selected{% endif %}{% if day.has_payments %} has-payments{% endif %}"
+         href="?day={{ day.iso }}" {% if day.date == selected_day %}aria-current="date"{% endif %}>
+        <span class="day-num">{{ day.date.day }}</span>
+        <span class="day-name">{{ day.weekday }}</span>
+        <span class="day-dot" aria-hidden="true"></span>
+        {% if day.has_payments %}<span class="sr-only">є платежі</span>{% endif %}
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card">
+  <div class="tabs" role="tablist">
+    <a role="tab" href="?tab=all" {% if tab == "all" %}aria-selected="true"{% endif %}>Мої підписки</a>
+    <a role="tab" href="?tab=upcoming" {% if tab == "upcoming" %}aria-selected="true"{% endif %}>Найближчі платежі</a>
+  </div>
+
+  {% if tab == "all" %}
+    <ul class="rows">
+      {% for s in subs %}
+        <li class="item-row brand-card" style="--brand: {% brand_color s.name s.service %}">
+          {% service_icon s.name 40 s.service s.icon %}
+          <div class="row-main">
+            <strong>{{ s.name }}</strong>
+            <span class="muted">{{ s.category|default:"Без категорії" }} · {{ s.get_billing_cycle_display }}</span>
+          </div>
+          {% include 'partials/state_badge.html' %}
+          <span class="muted row-date">{{ s.next_payment_date|date:"d.m.Y" }}</span>
+          <strong class="amount">{{ s.price|uah_short }}</strong>
+          <a class="icon-btn" href="{% url 'subscriptions:edit' s.pk %}" title="Редагувати" aria-label="Редагувати {{ s.name }}">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></svg>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="section-head">
+      <h2>{% if selected_day %}{{ selected_day|date:"j E" }}{% else %}Найближчі 30 днів{% endif %}</h2>
+      <div class="sum"><span class="muted">до сплати</span> <strong>{{ upcoming_total|uah_short }}</strong></div>
+    </div>
+    {% if upcoming %}
+      <div class="cards-grid">
+        {% for s in upcoming %}{% include 'partials/sub_card.html' %}{% endfor %}
+      </div>
+    {% else %}
+      <p class="muted empty-text">{% if selected_day %}На цей день платежів немає.{% else %}Найближчим часом платежів немає.{% endif %}</p>
+    {% endif %}
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

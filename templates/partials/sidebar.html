@@ -1,0 +1,61 @@
+{% load static %}
+{% url 'subscriptions:dashboard' as dash_url %}
+{% url 'subscriptions:list' as list_url %}
+{% url 'subscriptions:categories' as cat_url %}
+{% url 'subscriptions:tags' as tag_url %}
+{% url 'subscriptions:payments' as pay_url %}
+{% url 'subscriptions:manager_overview' as mgr_url %}
+<aside class="sidebar">
+  <a class="brand" href="{{ dash_url }}">
+    <img class="brand-mark" src="{% static 'subscriptions/img/subly.png' %}" alt="" width="32" height="32">
+    <span>Subly</span>
+  </a>
+
+  <a class="btn btn-primary btn-block" href="{% url 'subscriptions:add' %}">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    <span class="btn-label">Нова підписка</span>
+  </a>
+
+  <nav class="nav" aria-label="Головне меню">
+    <a href="{{ dash_url }}" {% if request.path == dash_url %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></svg>
+      Дашборд
+    </a>
+    <a href="{{ list_url }}" {% if request.path == list_url %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="3"/><path d="M8 10h8M8 14h5"/></svg>
+      Підписки
+    </a>
+    <a href="{{ cat_url }}" {% if request.path == cat_url %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>
+      Категорії
+    </a>
+    <a href="{{ tag_url }}" {% if request.path == tag_url %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12V5h7l9 9-7 7z"/><circle cx="8.5" cy="8.5" r="1"/></svg>
+      Теги
+    </a>
+    <a href="{{ pay_url }}" {% if request.path == pay_url %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="3"/><path d="M3 10h18"/></svg>
+      Платежі
+    </a>
+    {% if perms.subscriptions.view_all_stats %}
+    <a href="{{ mgr_url }}" {% if request.path == mgr_url %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19V9M12 19V5M19 19v-7"/></svg>
+      Статистика
+    </a>
+    {% endif %}
+  </nav>
+
+  <div class="sidebar-user">
+    <div class="avatar" aria-hidden="true">{{ user.username|slice:":1"|upper }}</div>
+    <div class="who">
+      <strong>{{ user.username }}</strong>
+      <span>{{ user.email|default:"без пошти" }}</span>
+    </div>
+    <form method="post" action="{% url 'accounts:logout' %}">
+      {% csrf_token %}
+      <button class="icon-btn" type="submit" title="Вийти" aria-label="Вийти">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M16 8l4 4-4 4M20 12H9"/></svg>
+      </button>
+    </form>
+  </div>
+</aside>
