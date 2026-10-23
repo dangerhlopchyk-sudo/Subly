@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load subs_extras %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <div class="head-service">
+    {% if service %}
+      {% service_icon service.name 56 service.slug %}
+    {% endif %}
+    <div>
+      <h1>{% if service %}{{ service.name }}{% elif custom %}Свій сервіс{% else %}{{ title }}{% endif %}</h1>
+      <p class="muted">
+        {% if service or custom %}<a href="{% url 'subscriptions:add' %}">← Обрати інший сервіс</a>{% else %}Вартість рахується за вибраний період оплати.{% endif %}
+      </p>
+    </div>
+  </div>
+</header>
+
+<section class="card form-card"{% if service %} style="--brand: {{ service.color }}"{% endif %}>
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% if service %}
+      {{ form.name }}
+      {% for error in form.name.errors %}<p class="error field-error">{{ error }}</p>{% endfor %}
+    {% else %}
+      {% include 'partials/form_field.html' with field=form.name %}
+    {% endif %}
+    {% if form.icon %}
+      <div class="field icon-upload{% if form.icon.errors %} has-error{% endif %}">
+        <label for="{{ form.icon.id_for_label }}">Зображення сервісу <span class="muted">(необов'язково)</span></label>
+        <div class="icon-upload-row">
+          <div class="icon-preview" id="icon-preview">
+            {% if sub and sub.icon %}<img src="{{ sub.icon.url }}" alt="">{% else %}<span class="muted">фото</span>{% endif %}
+          </div>
+          <div class="icon-upload-controls">
+            <label class="btn btn-soft btn-sm" for="{{ form.icon.id_for_label }}">Обрати зображення</label>
+            {{ form.icon }}
+            <p class="help" id="icon-name">PNG, JPG, WEBP або GIF, до 5 МБ</p>
+            {% if sub and sub.icon %}
+              <label class="check"><input type="checkbox" name="remove_icon" {% if form.remove_icon.value %}checked{% endif %}> Прибрати поточне зображення</label>
+            {% endif %}
+          </div>
+        </div>
+        {% for error in form.icon.errors %}<p class="error">{{ error }}</p>{% endfor %}
+      </div>
+    {% endif %}
+    <div class="grid-2">
+      {% include 'partials/form_field.html' with field=form.price %}
+      {% include 'partials/form_field.html' with field=form.billing_cycle %}
+    </div>
+    <div class="grid-2">
+      {% include 'partials/form_field.html' with field=form.next_payment_date %}
+      {% include 'partials/form_field.html' with field=form.category %}
+    </div>
+    {% include 'partials/form_field.html' with field=form.status %}
+    {% include 'partials/form_field.html' with field=form.tags %}
+    <label class="check"><input type="checkbox" name="{{ form.auto_renew.html_name }}" {% if form.auto_renew.value %}checked{% endif %}> {{ form.auto_renew.label }}</label>
+    {% include 'partials/form_field.html' with field=form.notes %}
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Зберегти</button>
+      <a class="btn btn-ghost" href="{% url 'subscriptions:list' %}">Скасувати</a>
+    </div>
+  </form>
+</section>
+
+<script>
+  (function () {
+    var input = document.querySelector("#{{ form.icon.id_for_label|default:'id_icon' }}");
+    if (!input) return;
+    var box = document.querySelector("#icon-preview"), label = document.querySelector("#icon-name");
+    input.addEventListener("change", function () {
+      var file = input.files && input.files[0];
+      if (!file) return;
+      var img = document.createElement("img");
+      img.alt = "";
+      img.src = URL.createObjectURL(file);
+      box.replaceChildren(img);
+      label.textContent = file.name;
+    });
+  })();
+</script>
+{% endblock %}

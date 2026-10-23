@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load subs_extras %}
+{% block title %}Підписки{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>Підписки</h1>
+    <p class="muted">Пошук, фільтри та загальні суми</p>
+  </div>
+  <a class="btn btn-primary" href="{% url 'subscriptions:add' %}">Додати підписку</a>
+</header>
+
+<form class="card filters" method="get">
+  <div class="field grow">
+    <label for="{{ form.q.id_for_label }}">{{ form.q.label }}</label>
+    {{ form.q }}
+  </div>
+  <div class="field"><label for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>{{ form.category }}</div>
+  <div class="field"><label for="{{ form.status.id_for_label }}">{{ form.status.label }}</label>{{ form.status }}</div>
+  <div class="field"><label for="{{ form.cycle.id_for_label }}">{{ form.cycle.label }}</label>{{ form.cycle }}</div>
+  <div class="field"><label for="{{ form.sort.id_for_label }}">{{ form.sort.label }}</label>{{ form.sort }}</div>
+  <div class="filters-actions">
+    <button class="btn btn-soft" type="submit">Застосувати</button>
+    <a class="btn btn-ghost" href="{% url 'subscriptions:list' %}">Скинути</a>
+  </div>
+</form>
+
+<section class="card table-card">
+  {% if subs %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr><th>Сервіс</th><th>Категорія</th><th>Вартість</th><th>Період</th><th>Наступний платіж</th><th>Статус</th><th><span class="sr-only">Дії</span></th></tr>
+      </thead>
+      <tbody>
+        {% for s in subs %}
+        <tr style="--brand: {% brand_color s.name s.service %}">
+          <td class="cell-main"><div class="cell-name">{% service_icon s.name 36 s.service s.icon %}<a href="{{ s.get_absolute_url }}"><strong>{{ s.name }}</strong></a></div></td>
+          <td data-label="Категорія">{% if s.category %}<span class="chip"><i style="background: {{ s.category.color }}"></i>{{ s.category.name }}</span>{% else %}<span class="muted">-</span>{% endif %}</td>
+          <td class="num" data-label="Вартість">{{ s.price|uah }}</td>
+          <td data-label="Період">{{ s.get_billing_cycle_display }}</td>
+          <td data-label="Наступний платіж"><span>{{ s.next_payment_date|date:"d.m.Y" }} <span class="muted">· {{ s.when_label }}</span></span></td>
+          <td data-label="Статус">{% include 'partials/state_badge.html' %}</td>
+          <td class="actions">
+            {% if s.is_active %}
+            <form method="post" action="{% url 'subscriptions:paid' s.pk %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <button class="btn btn-soft btn-sm" type="submit">Оплачено</button>
+            </form>
+            {% endif %}
+            <a class="icon-btn" href="{% url 'subscriptions:edit' s.pk %}" title="Редагувати" aria-label="Редагувати {{ s.name }}">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></svg>
+            </a>
+            <a class="icon-btn icon-danger" href="{% url 'subscriptions:delete' s.pk %}" data-confirm-delete data-kind="підписку" data-name="{{ s.name }}" title="Видалити" aria-label="Видалити {{ s.name }}">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include 'partials/pagination.html' %}
+  <footer class="totals">
+    <span class="muted">Активні підписки за всім фільтром ({{ paginator.count }}):</span>
+    <span>за місяць <strong>{{ month_total|uah }}</strong></span>
+    <span>за рік <strong>{{ year_total|uah }}</strong></span>
+  </footer>
+  {% else %}
+    <div class="empty">
+      <h2>Нічого не знайдено</h2>
+      <p class="muted">Змініть пошук чи фільтри або додайте нову підписку.</p>
+      <a class="btn btn-primary" href="{% url 'subscriptions:add' %}">Додати підписку</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
