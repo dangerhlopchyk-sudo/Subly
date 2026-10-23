@@ -1,0 +1,11 @@
+<div class="field{% if field.errors or invalid %} has-error{% endif %}">
+  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+  {{ field }}
+  {% if field.help_text %}<p class="help">{{ field.help_text }}</p>{% endif %}
+  {% if rules %}
+    <ul class="rules" aria-label="Вимоги до пароля">
+      {% for rule in rules %}<li class="rule{% if rule.bad %} is-bad{% elif rule.ok %} is-ok{% endif %}">{{ rule.text }}</li>{% endfor %}
+    </ul>
+  {% endif %}
+  {% for error in field.errors %}<p class="error">{{ error }}</p>{% endfor %}
+</div>

@@ -1,0 +1,15 @@
+{% if is_paginated %}
+<nav class="pagination" aria-label="Сторінки">
+  {% if page_obj.has_previous %}
+    <a class="btn btn-ghost btn-sm" href="?{% querystring page=page_obj.previous_page_number %}">← Назад</a>
+  {% else %}
+    <span class="btn btn-ghost btn-sm is-disabled" aria-disabled="true">← Назад</span>
+  {% endif %}
+  <span class="muted">Сторінка {{ page_obj.number }} з {{ paginator.num_pages }}</span>
+  {% if page_obj.has_next %}
+    <a class="btn btn-ghost btn-sm" href="?{% querystring page=page_obj.next_page_number %}">Далі →</a>
+  {% else %}
+    <span class="btn btn-ghost btn-sm is-disabled" aria-disabled="true">Далі →</span>
+  {% endif %}
+</nav>
+{% endif %}

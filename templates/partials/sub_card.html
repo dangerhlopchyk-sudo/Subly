@@ -1,0 +1,17 @@
+{% load subs_extras %}
+<article class="pay-card brand-card" style="--brand: {% brand_color s.name s.service %}">
+  <div class="pay-card-top">
+    {% service_icon s.name 44 s.service s.icon %}
+    {% include 'partials/state_badge.html' %}
+  </div>
+  <h3>{{ s.name }}</h3>
+  <p class="muted">{{ s.next_payment_date|date:"d E" }} · {{ s.when_label }}</p>
+  <div class="pay-card-bottom">
+    <strong class="amount">{{ s.price|uah_short }}</strong>
+    <form method="post" action="{% url 'subscriptions:paid' s.pk %}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <button class="btn btn-soft btn-sm" type="submit">Оплачено</button>
+    </form>
+  </div>
+</article>
