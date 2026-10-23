@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load subs_extras %}
+{% block title %}Нова підписка{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>Нова підписка</h1>
+    <p class="muted">Оберіть сервіс зі списку або додайте свій.</p>
+  </div>
+</header>
+
+<form class="card filters" method="get">
+  <div class="field grow">
+    <label for="q">Пошук сервісу</label>
+    <input id="q" name="q" type="search" value="{{ q }}" placeholder="Назва сервісу">
+  </div>
+  <div class="field">
+    <label for="category">Категорія</label>
+    <select id="category" name="category">
+      <option value="">Усі категорії</option>
+      {% for c in categories %}<option value="{{ c }}" {% if c == category %}selected{% endif %}>{{ c }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="filters-actions">
+    <button class="btn btn-soft" type="submit">Знайти</button>
+    <a class="btn btn-ghost" href="{% url 'subscriptions:add' %}">Скинути</a>
+  </div>
+</form>
+
+<section aria-label="Каталог сервісів">
+  <div class="tiles">
+    <a class="tile tile-custom" href="?service=custom">
+      <span class="tile-plus" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </span>
+      <strong>Свій сервіс</strong>
+      <span class="muted">Якщо його немає в списку</span>
+    </a>
+    {% for s in items %}
+      <a class="tile brand-card" href="?service={{ s.slug }}" style="--brand: {{ s.color }}">
+        {% service_icon s.name 52 s.slug %}
+        <strong>{{ s.name }}</strong>
+        <span class="muted">{{ s.category }}</span>
+      </a>
+    {% endfor %}
+  </div>
+  {% if not items %}
+    <div class="card empty">
+      <h2>Такого сервісу немає в каталозі</h2>
+      <p class="muted">Нічого страшного: додайте його вручну, вкажіть назву, вартість і дату платежу.</p>
+      <a class="btn btn-primary" href="?service=custom">Додати свій сервіс</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
