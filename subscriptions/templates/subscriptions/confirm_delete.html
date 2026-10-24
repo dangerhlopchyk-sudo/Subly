@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Видалення{% endblock %}
+
+{% block content %}
+<section class="card form-card narrow">
+  <h1>Видалити {{ kind }}?</h1>
+  <p class="muted">«{{ object.name }}» буде видалено без можливості відновлення.</p>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-actions">
+      <button class="btn btn-danger" type="submit">Видалити</button>
+      <a class="btn btn-ghost" href="{{ cancel_url }}">Скасувати</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load subs_extras %}
+{% block title %}{{ object.name }}{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <div class="head-service" style="--brand: {% brand_color object.name object.service %}">
+    {% service_icon object.name 56 object.service object.icon %}
+    <div>
+      <h1>{{ object.name }}</h1>
+      <p class="muted"><a href="{% url 'subscriptions:list' %}">← До списку підписок</a></p>
+    </div>
+  </div>
+  <div class="flex gap-2">
+    <a class="btn btn-soft" href="{% url 'subscriptions:edit' object.pk %}">Редагувати</a>
+    <a class="btn btn-danger" href="{% url 'subscriptions:delete' object.pk %}" data-confirm-delete data-kind="підписку" data-name="{{ object.name }}">Видалити</a>
+  </div>
+</header>
+
+<div class="two-col">
+  <section class="card form-card">
+    <dl class="detail-list">
+      <dt>Вартість</dt><dd>{{ object.price|uah }} · {{ object.get_billing_cycle_display }}</dd>
+      <dt>Статус</dt><dd>{% with s=object %}{% include 'partials/state_badge.html' %}{% endwith %}</dd>
+      <dt>Наступний платіж</dt><dd>{{ object.next_payment_date|date:"d.m.Y" }} · {{ object.when_label }}</dd>
+      <dt>Автопродовження</dt><dd>{{ object.auto_renew|yesno:"Так,Ні" }}</dd>
+      <dt>Категорія</dt>
+      <dd>{% if object.category %}<a href="{{ object.category.get_absolute_url }}">{{ object.category.name }}</a>{% else %}-{% endif %}</dd>
+      <dt>Теги</dt>
+      <dd>{% for tag in object.tags.all %}<a class="tag-chip" href="{{ tag.get_absolute_url }}">{{ tag.name }}</a>{% empty %}-{% endfor %}</dd>
+      <dt>Нотатки</dt><dd>{{ object.notes|default:"-"|linebreaksbr }}</dd>
+    </dl>
+    {% if object.is_active %}
+    <form method="post" action="{% url 'subscriptions:paid' object.pk %}" class="mt-4">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <button class="btn btn-primary" type="submit">Позначити оплаченою</button>
+    </form>
+    {% endif %}
+  </section>
+
+  <section class="card form-card">
+    <h2>Останні платежі</h2>
+    <ul class="rows">
+      {% for p in payments %}
+        <li class="item-row">
+          <div class="row-main"><a href="{{ p.get_absolute_url }}">{{ p.paid_date|date:"d.m.Y" }}</a></div>
+          <strong>{{ p.amount|uah }}</strong>
+        </li>
+      {% empty %}
+        <li class="muted">Платежів ще немає.</li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endblock %}
