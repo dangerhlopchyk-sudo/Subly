@@ -1,3 +1,4 @@
+
 import os
 from pathlib import Path
 
@@ -7,11 +8,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / '.env')
 
+
 SECRET_KEY = os.environ['SECRET_KEY']
 
 DEBUG = (os.environ.get('DEBUG') or 'True').lower() in ('1', 'true', 'yes')
 
 ALLOWED_HOSTS = []
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -53,6 +56,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -64,6 +68,7 @@ DATABASES = {
         'OPTIONS': {'charset': 'utf8mb4'},
     }
 }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -80,6 +85,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
 LANGUAGE_CODE = 'uk'
 
 TIME_ZONE = 'Europe/Kyiv'
@@ -88,10 +94,12 @@ USE_I18N = True
 
 USE_TZ = True
 
+
 STATIC_URL = 'static/'
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
 
 MAILERS = {
     'default': {
@@ -99,6 +107,10 @@ MAILERS = {
     },
 }
 
+
 LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'subscriptions:dashboard'
 LOGOUT_REDIRECT_URL = 'accounts:login'
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Вхід{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <div class="brand brand-large"><img class="brand-mark" src="{% static 'subscriptions/img/subly.png' %}" alt="" width="32" height="32"><span>Subly</span></div>
+  <h1>Вхід</h1>
+  <p class="muted">Підписки, платежі й витрати в одному місці.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% include 'partials/form_field.html' with field=form.username invalid=form.credentials_invalid %}
+    {% include 'partials/form_field.html' with field=form.password invalid=form.credentials_invalid %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button class="btn btn-primary btn-block" type="submit">Увійти</button>
+  </form>
+  <p class="auth-alt">Ще немає акаунта? <a href="{% url 'accounts:register' %}">Створити</a></p>
+</div>
+{% endblock %}
