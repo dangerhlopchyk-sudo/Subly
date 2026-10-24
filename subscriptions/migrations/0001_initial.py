@@ -1,17 +1,20 @@
-# Generated
-from django.db import migrations, models
-import django.db.models.deletion
+
 import django.core.validators
+import django.db.models.deletion
 import subscriptions.validators
 from decimal import Decimal
 from django.conf import settings
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+
     initial = True
+
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
+
     operations = [
         migrations.CreateModel(
             name='Category',
