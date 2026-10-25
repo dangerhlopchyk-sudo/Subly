@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Новий тег{% endblock %}
+
+{% block content %}
+<header class="page-head"><h1>Новий тег</h1></header>
+<section class="card form-card narrow">
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% include 'partials/form_field.html' with field=form.name %}
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Додати</button>
+      <a class="btn btn-ghost" href="{% url 'subscriptions:tags' %}">Скасувати</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load subs_extras %}
+{% block title %}{{ object.name }}{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>Тег «{{ object.name }}»</h1>
+    <p class="muted"><a href="{% url 'subscriptions:tags' %}">← Усі теги</a></p>
+  </div>
+</header>
+<section class="card">
+  <ul class="rows">
+    {% for s in subs %}
+      <li class="item-row">
+        {% service_icon s.name 36 s.service s.icon %}
+        <div class="row-main"><a href="{{ s.get_absolute_url }}"><strong>{{ s.name }}</strong></a></div>
+        <span>{{ s.price|uah }}</span>
+      </li>
+    {% empty %}
+      <li class="muted">З цим тегом немає підписок.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

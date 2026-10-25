@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load subs_extras %}
+{% block title %}Платежі{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>Платежі</h1>
+    <p class="muted">Історія відмічених оплат</p>
+  </div>
+</header>
+<section class="card table-card">
+  {% if payments %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Дата</th><th>Підписка</th><th>Сума</th></tr></thead>
+      <tbody>
+        {% for p in payments %}
+        <tr>
+          <td class="cell-main"><a href="{{ p.get_absolute_url }}">{{ p.paid_date|date:"d.m.Y" }}</a></td>
+          <td data-label="Підписка"><a href="{{ p.subscription.get_absolute_url }}">{{ p.subscription.name }}</a></td>
+          <td class="num" data-label="Сума">{{ p.amount|uah }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include 'partials/pagination.html' %}
+  <footer class="totals"><span class="muted">Разом ({{ paginator.count }}):</span> <strong>{{ total|uah }}</strong></footer>
+  {% else %}
+  <div class="empty">
+    <h2>Платежів ще немає</h2>
+    <p class="muted">Натисніть «Оплачено» біля підписки, і запис з'явиться тут.</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
